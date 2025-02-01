@@ -2,35 +2,34 @@ provider "azurerm" {
   features {}
 }
 
-# Resource Group
-resource "azurerm_resource_group" "rg" {
-  name     = "hello-world-rg"
-  location = var.location
+resource "azurerm_resource_group" "example" {
+  name     = "example-resources"
+  location = "East US"
 }
 
-# App Service Plan
-resource "azurerm_app_service_plan" "app_plan" {
-  name                = "hello-world-plan"
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
+resource "azurerm_app_service_plan" "example" {
+  name                = "example-app-service-plan"
+  location            = azurerm_resource_group.example.location
+  resource_group_name = azurerm_resource_group.example.name
+  kind                = "Linux"
+  reserved            = true
   sku {
-    tier = "Free"
-    size = "F1"
+    tier = "Standard"
+    size = "S1"
   }
 }
 
-# Web App
-resource "azurerm_linux_web_app" "web_app" {
-  name                = "hello-world-webapp"
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
-  service_plan_id     = azurerm_app_service_plan.app_plan.id
-
-  site_config {
-    java_version = "Java 11"
-  }
+resource "azurerm_app_service" "example" {
+  name                = "example-app-service"
+  location            = azurerm_resource_group.example.location
+  resource_group_name = azurerm_resource_group.example.name
+  app_service_plan_id = azurerm_app_service_plan.example.id
 
   app_settings = {
-    WEBSITE_RUN_FROM_PACKAGE = "1"
+    "SOME_KEY" = "SOME_VALUE"
   }
+}
+
+output "app_service_url" {
+  value = azurerm_app_service.example.default_site_hostname
 }
